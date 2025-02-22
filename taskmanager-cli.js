@@ -1,6 +1,7 @@
 const fs = require("fs");
 const filePath = "./tasks.json";
 
+// Load tasks from file
 const loadTasks = () => {
   try {
     const dataBuffer = fs.readFileSync(filePath);
@@ -9,20 +10,23 @@ const loadTasks = () => {
   } catch (error) {
     return [];
   }
-}; 
+};
 
+// Save tasks to file
 const saveTasks = (tasks) => {
   const dataJSON = JSON.stringify(tasks);
   fs.writeFileSync(filePath, dataJSON);
 };
 
-const addTask = (task,dueDate = "No due date") => {
+// Add a new task
+const addTask = (task, dueDate = "No due date") => {
   const tasks = loadTasks();
-  tasks.push({ task, completed : false, due: "No due date" });
+  tasks.push({ task, completed: false, due: dueDate });
   saveTasks(tasks);
   console.log(`Task added: "${task}" (Due: ${dueDate})`);
 };
 
+// List all tasks
 const listTasks = () => {
   const tasks = loadTasks();
   tasks.forEach((task, index) => {
@@ -31,6 +35,7 @@ const listTasks = () => {
   });
 };
 
+// Remove a task
 const removeTask = (index) => {
   let tasks = loadTasks();
   if (index < 1 || index > tasks.length) {
@@ -42,42 +47,41 @@ const removeTask = (index) => {
   console.log("Task removed successfully.");
 };
 
-const completeTask = (index) =>{
+// Mark a task as completed
+const completeTask = (index) => {
   let tasks = loadTasks();
-
-  if(index<1 || index>tasks.length){
-    console.log("Invalid Task Number!");
+  if (index < 1 || index > tasks.length) {
+    console.log("Invalid task number!");
     return;
   }
-  tasks[index-1].completed = true;
+  tasks[index - 1].completed = true;
   saveTasks(tasks);
   console.log(`Task ${index} marked as completed.`);
-}
+};
 
-const editTask = (index, newTask) =>{
+// Edit a task
+const editTask = (index, newTask) => {
   const tasks = loadTasks();
-
   if (!tasks.length) {
     console.log("No tasks found!");
     return;
   }
-
   if (!index || isNaN(index) || index < 1 || index > tasks.length) {
     console.log("Invalid task number! Please provide a valid number.");
     return;
   }
-
   tasks[index - 1].task = newTask;
   saveTasks(tasks);
   console.log(`Task ${index} updated to: "${newTask}"`);
-}
+};
 
+// Clear all tasks
 const clearTasks = () => {
-  saveTasks([]); // Overwrite the file with an empty array
+  saveTasks([]);
   console.log("All tasks have been removed!");
 };
 
-
+// Handle CLI commands
 const command = process.argv[2];
 const argument = process.argv[3];
 
@@ -89,11 +93,12 @@ if (command === "add") {
   listTasks();
 } else if (command === "remove") {
   removeTask(parseInt(argument));
-} else if(command === "complete"){
+} else if (command === "complete") {
   completeTask(parseInt(argument));
-} else if(command === "edit"){
-  editTask(parseInt(argument, process.argv.slice(4).join(" ")))
-} else if(command === "clear"){
+} else if (command === "edit") {
+  const newTask = process.argv.slice(4).join(" "); // Fix for handling multiple words
+  editTask(parseInt(argument), newTask);
+} else if (command === "clear") {
   clearTasks();
 } else {
   console.log("Command not found!");
